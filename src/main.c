@@ -29,7 +29,7 @@ SDL_Window 		*window;
 SDL_Texture 	*frame;
 SDL_Renderer	*renderer;
 
-bool			debug;
+int				debug;
 
 static char 	*helptxt = {
 	"SDL2 zx81 emulator written by NotArtyom\r\n"
@@ -37,7 +37,7 @@ static char 	*helptxt = {
 	"\r\n"
 	"    -h           shows this help text\r\n"
 	"    -r <file>    uses <file> as the zx81 system ROM\r\n"
-	"    -d           enables debug mode\r\n"
+	"    -d <level>   enables debug mode. multiple debug args will increase verbosity\r\n"
 };
 
 //-------------------------------------------------
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 				exit(0);
 				break;
 			case 'd':
-				debug = true;
+				debug++;
 				break;
 		}
 	}
@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 		render_vram(renderer);
 		// Update the window with the new frame
 		SDL_RenderPresent(renderer);
-		cycle_system();
+		cycle_system(main_context);
 	}
 
 	// Clean up after ourselves

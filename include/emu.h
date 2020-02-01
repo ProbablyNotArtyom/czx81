@@ -13,9 +13,9 @@
 #define MEMBLOCK_FLAG_READ		0b00000001		// Memory can be read from
 #define MEMBLOCK_FLAG_WRITE		0b00000010		// Memory can be written to
 #define MEMBLOCK_FLAG_RW		0b00000011
+#define MEMBLOCK_FLAG_MIRROR	0b10000000
 
-#define DEFINE_MEMBLOCK(name,ptr,len,addr,flag)	\
-	{ ptr, len, addr, flag, name, 0 }
+#define DEFINE_MEMBLOCK(name,ptr,len,addr,flag)	{ ptr, len, addr, flag, name, NULL}
 
 struct Memblock {
 	uint8_t				*data;		// Pointer to the segment's data
@@ -42,7 +42,7 @@ extern SDL_Texture 			*frame;
 extern SDL_Renderer			*renderer;
 extern SDL_GLContext 		*glcontext;
 
-extern bool					debug;
+extern int					debug;
 
 //-------------------------------------------------
 

@@ -15,7 +15,7 @@ LD := ld
 AS := as
 AR := ar
 CPY := objcopy
-CCFLAGS := -Wall -I $(PWD)/lib/libz80/ -I $(INCDIR)
+CCFLAGS := -no-pie -Wall -I $(PWD)/lib/libz80/ -include $(PWD)/lib/libz80/z80.h -I $(INCDIR)
 
 SOURCES := $(shell find $(BASEDIR)/src -name '*.c')
 LIBS = ./lib/libz80/libz80.o
@@ -46,7 +46,7 @@ $(OBJECTS): $$(patsubst $$(BINDIR)%.o, $$(BASEDIR)%.c, $$@)
 	$(CC) $(CCFLAGS) -c $(patsubst $(BINDIR)%, $(BASEDIR)%, $(@:%.o=%.c)) -o $@
 
 $(BINARY_NAME): $(OBJECTS) $(LIBS)
-	$(CC) -lGLEW -lGL -lSDL2 -lSDL2_image -lm -lc $(OBJECTS) -o $(BINDIR)/$(BINARY_NAME)
+	$(CC) -no-pie -lGLEW -lGL -lSDL2 -lSDL2_image -lm -lc $(BINDIR)/*.o $(OBJECTS) -o $(BINDIR)/$(BINARY_NAME)
 
 #-------------------------------------------------
 

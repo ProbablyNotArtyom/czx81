@@ -28,8 +28,7 @@ void setup_system(char *rom_filename) {
 	main_context = context_create(main_context);
 
 	// Init the ROM memblock for the context
-	struct Memblock	*rom_memblock;
-	rom_memblock = (struct Memblock *)malloc(sizeof(struct Memblock));
+	struct Memblock	*rom_memblock = (struct Memblock *)malloc(sizeof(struct Memblock));
 	// If we have been given a filename to load, prioritize that over the included ROM
 	if (rom_filename != NULL) {
 		FILE *rom;
@@ -50,8 +49,10 @@ void setup_system(char *rom_filename) {
 	// Set the virtual address of the ROM & make sure its readable
 	rom_memblock->address = 0x0000;
 	rom_memblock->flags = MEMBLOCK_FLAG_READ;
+	rom_memblock->name = NULL;
 	// Add the ROM memblock to the emulator context
 	context_add_memblock(main_context, rom_memblock);
+	add_default_memblocks(main_context);
 
 	// Initialize the video hardware stuff
 	setup_video();
@@ -62,33 +63,36 @@ void setup_system(char *rom_filename) {
 }
 
 uint8_t read_memspace_byte(System_Context_t *context, size_t address) {
-	if (debug) printf("memspace: reading byte at $%X\n", address);
+	if (debug > 3) printf("memspace: reading byte at $%X\n", address);
 
 	// Preload the pointer with the address of the first memblock
 	// Then iterate through as many as possible
-	struct Memblock *ptr = context->memblocks;
+	struct Memblock **ptr = &(context->memblocks);
+	struct Memblock *blockptr;
 	for (int i = 0; i < context->num_blocks; i++) {
+		blockptr = (*ptr);
 		// Abort if the memblock doesn't exist
-		if (ptr == NULL) return NULL;
+		if (blockptr == NULL) return NULL;
 		// Check if the address is in the memblock's range, and break if so
-		if ((address >= ptr->address) && (address < (ptr->address + ptr->len))) break;
+		if ((address >= blockptr->address) && (address < (blockptr->address + blockptr->len))) break;
 		// If it's not in range, then try the next memblock
-		else ptr = ptr->next;
+		ptr = &(*ptr)->next;
 	}
 
 	// If no memblocks match, then return a garbage byte, in this case NULL
-	if (ptr == NULL) return 0x00;
+	if (blockptr == NULL) return 0x00;
 	// Make sure the memblock that did match is capable of being read from
-	if (ptr->flags & MEMBLOCK_FLAG_READ) {
+	if (blockptr->flags & MEMBLOCK_FLAG_READ) {
 		// Subtract the read address from the memblock base to get the address's index in the memblock's data array
-		return (ptr->data[address - ptr->address]);
+		return (blockptr->data[address - blockptr->address]);
 	}
 	// We can't read from the matched memblock, so for now just return NULL
+	if (debug > 2) puts("[!] Attempted write to read-only memblock.\n");
 	return 0x00;
 }
 
 void write_memspace_byte(System_Context_t *context, size_t address, uint8_t val) {
-	if (debug) printf("memspace: writing $%X to $%X\n", val, address);
+	if (debug > 3) printf("memspace: writing $%X to $%X\n", val, address);
 
 	// Preload the pointer with the address of the first memblock
 	// Then iterate through as many as possible
@@ -110,9 +114,4 @@ void write_memspace_byte(System_Context_t *context, size_t address, uint8_t val)
 		// Then write the value to it
 		ptr->data[address - ptr->address] = val;
 	}
-}
-
-double total = 0.0;
-void cycle_system() {
-
 }
