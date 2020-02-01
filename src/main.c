@@ -37,13 +37,13 @@ static char 	*helptxt = {
 	"\r\n"
 	"    -h           shows this help text\r\n"
 	"    -r <file>    uses <file> as the zx81 system ROM\r\n"
-	"    -d <level>   enables debug mode. multiple debug args will increase verbosity\r\n"
+	"    -d           sets debug mode. multiple debug args will increase verbosity\r\n"
 };
 
 //-------------------------------------------------
 
 int main(int argc, char *argv[]) {
-	debug = false;
+	debug = 0;
 	int opt;
 	char *rom_filename = NULL;
 
